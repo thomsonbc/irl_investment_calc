@@ -73,13 +73,9 @@ class InvestmentCalc:
 
         if dd_chunks['remainder'] > 0:
             growth_array = (self.growth_formula() ** np.array(range(1, dd_chunks['remainder']+1))) * new_principal
-            
             new_principal = self.dd_tax(growth_array[-1], new_principal)
-            
             master_array = np.append(master_array, growth_array)
-            
             final_value = self.dd_tax(growth_array[-1], new_principal)
-            
             master_array[-1] = final_value
 
         return master_array
@@ -97,15 +93,17 @@ class InvestmentCalc:
         for i in range(self.periods+1):
             zeros_array = np.zeros(i, dtype = float)
             growth_array = self.calculate_growth(periods = self.periods - i)
-            
             result_array = np.append(zeros_array, growth_array)
-            print(result_array.shape)
             master_array = np.append(result_array, master_array)
         
         return master_array.reshape(self.periods+1, self.periods+1)
     
     def matrix_sum(self):
         return np.sum(self.build_matrix(), axis = 0)
+
+    def no_dd_growth(self):
+        return
+
     
     
 
