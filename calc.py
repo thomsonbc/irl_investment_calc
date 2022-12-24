@@ -38,17 +38,13 @@ class InvestmentCalc:
 
     def growth_formula(self) -> float:
 
-        '''
-        P = the principal balance
-        r = the annual interest rate (decimal)
-        n = number of times interest is compounded per year
-        t = the time in years
-        '''
         return 1+(self.growth/12)
     
     def calculate_growth(self):
         '''Returns an array recording an investment's growth and taxation for a given
-        period of time'''
+        period of time.
+        
+        Run this in chunks of up to 8 years, then do the deemed disposal'''
 
         multiplier=self.growth_formula()
 
@@ -59,7 +55,7 @@ class InvestmentCalc:
         return x * self.principal
 
     def build_matrix(self):
-        '''Build a that tracks each month's investment growth and taxation
+        '''Build a matrix that tracks each month's investment growth and taxation
         for a given period of time'''
         
 
