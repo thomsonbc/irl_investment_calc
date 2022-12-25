@@ -69,12 +69,8 @@ class InvestmentCalc:
         Taxes final value.'''
 
         new_principal = self.principal
-
         master_array = np.array(self.principal, dtype=float)
-
         dd_chunks = self._calculate_dd_chunks(periods)
-
-        tax_array = np.zeros(0, dtype = float)
 
         for chunk in range(dd_chunks['dd_chunks']):
             growth_array = self.get_growth_array(np.array(range(1,97)), new_principal)
@@ -93,8 +89,6 @@ class InvestmentCalc:
             final_value = self.dd_tax_deduct(growth_array[-1], new_principal)
             master_array[-1] = final_value
 
-        self.tax_owed = tax_array
-    
         return master_array
     
     def calculate_tax_owed(self, periods = None) -> np.ndarray:
