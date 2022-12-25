@@ -3,7 +3,7 @@ An investment calculator that considers elements of Irish tax law for ETF invest
 
 ## Rationale for calculator
 
-When ETF shares are bought in Ireland, the investor is liable to pay a tax of 41% on profits from the sale of the shares. If the investor has not disposed of the shares by the 8th anniversary of their purchase then the shares are deemed to be disposed. In other words, after 8 8 years of ownership of any ETF shares, you owe a tax on the profits of those shares even if you have not sold them. 
+When ETF shares are bought in Ireland, the investor is liable to pay a tax of 41% on profits from the sale of the shares. If the investor has not disposed of the shares by the 8th anniversary of their purchase then the shares are deemed to be disposed. In other words, after 8 years of ownership of any ETF shares, you owe a tax on the profits of those shares even if you have not sold them. 
 
 If a person chose to make regular investments into an ETF for an extended period of time, then trying to estimate returns and keeping track of each purchases's tax burden becomes complicated. 
 
