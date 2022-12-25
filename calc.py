@@ -3,6 +3,8 @@ import math
 
 class InvestmentCalc:
 
+    '''WORK IN PROGRESS!'''
+
     def __init__(self, principal: int, years: int, growth_pc: int, frequency: str = 'monthly') -> None:
         self.dd_division_constants = {'monthly': 96, 'yearly': 8}
         self.principal = self._is_valid_principal(principal)
