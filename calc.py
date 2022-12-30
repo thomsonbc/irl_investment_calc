@@ -3,7 +3,7 @@ import math
 
 class InvestmentCalc:
 
-    '''WORK IN PROGRESS!'''
+    '''WORK IN PROGRESS'''
 
     def __init__(self, principal: int, years: int, growth_pc: int, frequency: str = 'monthly') -> None:
         self.dd_division_constants = {'monthly': 96, 'yearly': 8}
@@ -14,7 +14,12 @@ class InvestmentCalc:
         self.periods = self._years_to_periods()
         self.dd_chunks = self._calculate_dd_chunks(self.periods)
         self.tax_rate = 0.41
-        self.tax_owed = None
+        self.inv_calc_matrix = self.build_matrix(dd = True)
+        self.inv_calc_summary = self.matrix_sum(matrix = self.inv_calc_matrix)
+        self.untaxed_inv_calc_matrix = self.build_matrix(dd = False)
+        self.untaxed_inv_calc_summary = self.matrix_sum(matrix = self.untaxed_inv_calc_matrix)
+        self.tax_owed_matrix = self.build_tax_matrix()
+        self.tax_owed_summary = self.matrix_sum(matrix = self.tax_owed_matrix)
         
     
     def _is_valid_principal(self, principal) -> int:
@@ -49,7 +54,7 @@ class InvestmentCalc:
     def growth_formula(self) -> float:
         return 1+(self.growth/12)
 
-    def dd_tax_deduct(self, value, principal: float) -> float:
+    def dd_tax_deduct(self, value: float, principal: float) -> float:
         profit = value - principal
         net_profit = profit * (1 - self.tax_rate)
         return principal + net_profit
@@ -58,66 +63,75 @@ class InvestmentCalc:
         profit = value - principal
         return profit * self.tax_rate
     
-    def get_growth_array(self, array: np.ndarray, new_principal: float):
+    def get_growth_array(self, array: np.ndarray, new_principal: float) -> np.ndarray:
         return (self.growth_formula() ** array) * new_principal
-    
-    
-    def calculate_growth(self, periods) -> np.ndarray:
+
+    def calculate_untaxed_growth(self, periods: int) -> np.ndarray:
+        '''Calculates investment growth without taxation as a comparison to deemed disposal growth 
+        for a single investment'''
+        
+        master_array=self.get_growth_array(np.array(range(periods)), self.principal)
+        final_value = self.dd_tax_deduct(master_array[-1], self.principal)
+        return np.append(master_array, final_value)
+
+    def calculate_growth(self, periods: int) -> np.ndarray:
         '''Returns an array recording an investment's growth and taxation for a given
         period of time.
         
         Runs in chunks of up to 8 years, then does the deemed disposal.
         
-        Taxes final value.'''
+        Taxes final value and appends to end of array.'''
 
         new_principal = self.principal
-        master_array = np.array(self.principal, dtype=float)
+        master_array = np.zeros(0, dtype=float)
         dd_chunks = self._calculate_dd_chunks(periods)
-
-        for chunk in range(dd_chunks['dd_chunks']):
-            growth_array = self.get_growth_array(np.array(range(1,97)), new_principal)
-
-            new_principal = self.dd_tax_deduct(growth_array[-1], new_principal)
-            
-            master_array = np.append(master_array, growth_array)
         
-        if dd_chunks['remainder'] > 0:
-            growth_array = self.get_growth_array(np.array(range(1, dd_chunks['remainder']+1)), new_principal)
-
-            new_principal = self.dd_tax_deduct(growth_array[-1], new_principal)
+        for chunk in range(dd_chunks['dd_chunks']):
+            growth_array = self.get_growth_array(np.array(range(96)), new_principal)
 
             master_array = np.append(master_array, growth_array)
 
-            final_value = self.dd_tax_deduct(growth_array[-1], new_principal)
-            master_array[-1] = final_value
+            new_principal = self.dd_tax_deduct(growth_array[-1], new_principal)
+
+        if dd_chunks['remainder'] > 0:
+            growth_array = self.get_growth_array(np.array(range(dd_chunks['remainder'])), new_principal)
+
+            master_array = np.append(master_array, growth_array)
+
+            new_principal = self.dd_tax_deduct(growth_array[-1], new_principal)
+
+        try:
+            final_principal = growth_array[0]
+            final_value = self.dd_tax_deduct(master_array[-1], final_principal)
+            #print(f"Last new principal: {final_principal}. Final value of investment:{master_array[-1]} after {periods} months. Tax: {master_array[-1]-final_value}")
+            master_array = np.append(master_array,final_value)
+        except:
+            print(f"periods at error: {periods}")
 
         return master_array
     
-    def calculate_tax_owed(self, periods = None) -> np.ndarray:
+    def calculate_tax_owed(self, periods: int) -> np.ndarray:
         '''Returns an array recording investment tax burden per year
         Could likely be worked into self.calculate_growth()'''
         new_principal = self.principal
-
-        master_tax_array = np.zeros(0, dtype=float)
-
-
+        master_tax_array = np.zeros(1, dtype=float)
         dd_chunks = self._calculate_dd_chunks(periods)
 
         for chunk in range(dd_chunks['dd_chunks']):
-            growth_array = self.get_growth_array(np.array(range(1,97)), new_principal)
-
-            new_principal = self.dd_tax_deduct(growth_array[-1], new_principal)
+            growth_array = self.get_growth_array(np.array(range(96)), new_principal)
             
             tax_array = np.append(np.zeros(7, dtype=float), self.dd_tax_owed(growth_array[-1], new_principal))
 
+            new_principal = self.dd_tax_deduct(growth_array[-1], new_principal)
+            
             master_tax_array = np.append(master_tax_array, tax_array)
         
         if dd_chunks['remainder'] > 0:
-            growth_array = self.get_growth_array(np.array(range(1, dd_chunks['remainder']+1)), new_principal)
-
-            new_principal = self.dd_tax_deduct(growth_array[-1], new_principal)
+            growth_array = self.get_growth_array(np.array(range(dd_chunks['remainder'])), new_principal)
 
             tax_array = np.append(np.zeros(self.round_up(periods)-1, dtype=float), self.dd_tax_owed(growth_array[-1], new_principal))
+
+            new_principal = self.dd_tax_deduct(growth_array[-1], new_principal)
             
             master_tax_array = np.append(master_tax_array, tax_array)
 
@@ -125,8 +139,7 @@ class InvestmentCalc:
         return master_tax_array
 
 
-
-    def build_matrix(self) -> np.ndarray:
+    def build_matrix(self, dd = True) -> np.ndarray:
         '''
         -Build a 2d array that tracks each month's investment growth and taxation
         for a given period of time.
@@ -137,14 +150,17 @@ class InvestmentCalc:
         '''
         master_array = np.zeros(0,dtype=float)
 
-        for i in range(self.periods+1):
+        for i in range(self.periods):
             zeros_array = np.zeros(i, dtype = float)
-            growth_array = self.calculate_growth(periods = self.periods - i)
+            if dd:
+                growth_array = self.calculate_growth(periods = self.periods - i)
+            else:
+                growth_array = self.calculate_untaxed_growth(periods = self.periods - i)
             result_array = np.append(zeros_array, growth_array)
-            master_array = np.append(result_array, master_array)
+            master_array = np.append(master_array, result_array)
 
         
-        return master_array.reshape(self.periods+1, self.periods+1)
+        return master_array.reshape(self.periods, self.periods+1)
 
     def build_tax_matrix(self) -> np.ndarray:
         '''
@@ -161,15 +177,11 @@ class InvestmentCalc:
             master_array = np.append(master_array,result_array)
 
         
-        return master_array.reshape(self.periods+1,init_array_length)
+        return master_array.reshape(self.periods+1, init_array_length)
     
     def matrix_sum(self, matrix: np.ndarray) -> np.ndarray:
         '''Returns col sum'''
-        return np.sum(matrix, axis = 0)
-
-    def no_dd_growth(self):
-        '''Return array that shows an investement's growth without deemed disposal'''
-        return
+        return np.around(np.sum(matrix, axis = 0), decimals = 2)
     
     def round_up(self, periods: int, decimals=0)  -> float:
         '''Function to round up remainder periods to next year when calculating tax burden'''
@@ -182,12 +194,12 @@ class InvestmentCalc:
 #Need to add functionality for yearly option etc
     
 
-x=InvestmentCalc(years=40, growth_pc=10, principal=1000, frequency='monthly')
+x=InvestmentCalc(years=24, growth_pc=10, principal=1000, frequency='monthly')
 
 
-# print(f"Interest compounds {x.frequency}")
-# print(x.periods)
-print(x.dd_chunks)
-#print(x.calculate_tax_owed())
-print(x.build_tax_matrix()[0])
+
+
+print(x.tax_owed_summary)
+
+
 

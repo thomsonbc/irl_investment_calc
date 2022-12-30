@@ -16,8 +16,10 @@ The calculator also returns a similar matrix describing the yearly tax burden th
  - When an investment's deemed disposal occurs, the shares bought for that investment are entirely disposed and the post-tax value is immediately re-invested
  - No annual charges or management fees are taken into account
  - When disposing of an investment, the spread is not taken into account
+ - No dividends are taken into account
 
 ## Features
 - Calculates the growth of a constant period investment for a specified number of years
-    - Takes Ireland's 'deemed disposal' rule into account, i.e. 41% tax on profits 8 years after investment. The 
+    - Takes Ireland's 'deemed disposal' rule into account, i.e. 41% tax on profits 8 years after investment
+    - Generates untaxed growth as a comparison
     - Calculates yearly tax burden 
