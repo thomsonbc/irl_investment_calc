@@ -3,7 +3,24 @@ import math
 
 class InvestmentCalc:
 
-    '''WORK IN PROGRESS'''
+    """Class that calculates ETF investment growth taking into account the deemed disposal rule
+
+    Attributes:
+        dd_division_constants     Dictionary with number of times an investment occurs over an eight year period
+        principal   Starting investment value to be used in all calculations
+        years       Duration of investment in years
+        growth      Percentage growth per year
+        frequency   Frequency of investments, e.g. monthly or yearly
+        periods     Duration of investment in months, calculated from year variable
+        dd_chunks   Dictionary containing information on the number of times a deemed disposal occurs, plus any remaining months
+        tax_rate    Decimal tax rate for deemed disposal - Constant
+        inv_calc_matrix     2D array of investment growth
+        inv_calc_summary    1D array of summarised investment growth
+        untaxed_calc_matrix     2D array of untaxed investment growth
+        untaxed_calc_summary    1D array of summarised untaxed investment growth
+        tax_owed_matrix     2D array of tax owed per year per investment
+        tax_owed_summary    1D array of summaries tax owed per year
+    """
 
     def __init__(self, principal: int, years: int, growth_pc: int, frequency: str = 'monthly') -> None:
         self.dd_division_constants = {'monthly': 96, 'yearly': 8}
@@ -34,8 +51,8 @@ class InvestmentCalc:
 
     def _is_valid_growth(self, growth_pc) -> float:
         if growth_pc < 0:
-            raise ValueError('growth needs to be type int greater than zero')
-        return growth_pc/100
+            raise ValueError('Growth_pc needs to be type int greater than zero')
+        return growth_pc / 100
 
     def _is_valid_frequency(self, frequency) -> str:
         if frequency.lower() not in self.dd_division_constants.keys():
@@ -52,14 +69,14 @@ class InvestmentCalc:
         return {'dd_chunks':dd_chunks, 'remainder':remainder}
         
     def growth_formula(self) -> float:
-        return 1+(self.growth/12)
+        return 1 + (self.growth / 12)
 
     def dd_tax_deduct(self, value: float, principal: float) -> float:
         profit = value - principal
         net_profit = profit * (1 - self.tax_rate)
         return principal + net_profit
     
-    def dd_tax_owed(self, value: float, principal:float) -> float:
+    def dd_tax_owed(self, value: float, principal: float) -> float:
         profit = value - principal
         return profit * self.tax_rate
     
@@ -102,9 +119,11 @@ class InvestmentCalc:
 
         try:
             final_principal = growth_array[0]
+
             final_value = self.dd_tax_deduct(master_array[-1], final_principal)
-            #print(f"Last new principal: {final_principal}. Final value of investment:{master_array[-1]} after {periods} months. Tax: {master_array[-1]-final_value}")
+
             master_array = np.append(master_array,final_value)
+
         except:
             print(f"periods at error: {periods}")
 
@@ -180,7 +199,7 @@ class InvestmentCalc:
         return master_array.reshape(self.periods+1, init_array_length)
     
     def matrix_sum(self, matrix: np.ndarray) -> np.ndarray:
-        '''Returns col sum'''
+        '''Returns col sum of matrix'''
         return np.around(np.sum(matrix, axis = 0), decimals = 2)
     
     def round_up(self, periods: int, decimals=0)  -> float:
