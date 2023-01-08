@@ -23,3 +23,8 @@ The calculator also returns a similar matrix describing the yearly tax burden th
     - Takes Ireland's 'deemed disposal' rule into account, i.e. 41% tax on profits 8 years after investment
     - Generates untaxed growth as a comparison
     - Calculates yearly tax burden 
+
+## To Do
+- Enable different frequencies of investment, i.e. yearly, quarterly
+- Display class use cases with Jupyter or simple R Shiny app
+- Use historical index fund data to model returns over a specified period
