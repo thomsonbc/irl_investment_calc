@@ -25,6 +25,7 @@ The calculator also returns a similar matrix describing the yearly tax burden th
     - Calculates yearly tax burden 
 
 ## To Do
+- Write documentation / how-to
 - Enable different frequencies of investment, i.e. yearly, quarterly
 - Display class use cases with Jupyter or simple R Shiny app
 - Use historical index fund data to model returns over a specified period
