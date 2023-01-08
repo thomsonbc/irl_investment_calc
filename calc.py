@@ -210,15 +210,7 @@ class InvestmentCalc:
         return int(x)
 
 
-#Need to add functionality for yearly option etc
-    
 
-x=InvestmentCalc(years=24, growth_pc=10, principal=1000, frequency='monthly')
-
-
-
-
-print(x.tax_owed_summary)
 
 
 
